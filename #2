@@ -1,0 +1,110 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+class CollectionType<T>       //Узагальнений клас
+{
+    private List<T> items = new List<T>();
+    public void Add(T item) => items.Add(item);
+    public void AddRange(IEnumerable<T> collection) => items.AddRange(collection);
+    public void PrintAll()
+    {
+        foreach (var item in items)
+            Console.WriteLine(item);
+    }
+    public List<T> ToList() => new List<T>(items);
+    public void Sort()
+    {
+        if (typeof(IComparable<T>).IsAssignableFrom(typeof(T)))
+            items.Sort();
+        else
+            Console.WriteLine("Клас не реалізує IComparable<T>, сортування недоступне.");
+    }
+    public IEnumerable<T> Query(Func<T, bool> predicate) => items.Where(predicate);
+}
+class ViddilKadriv : IComparable<ViddilKadriv>     //Клас з реалізацією IComparable
+{
+    private string pr;
+    private string inic;
+    private int rik;
+    private double okl;
+    public ViddilKadriv()
+    {
+        Prizv = "Не вказано";
+        Inicialy = "Не вказано";
+        RikNarodg = 2006;
+        Oklad = 0.0;
+    }
+    public ViddilKadriv(string prizv, string inicialy, int rikNarodg, double oklad)
+    {
+        Prizv = prizv;
+        Inicialy = inicialy;
+        RikNarodg = rikNarodg;
+        Oklad = oklad;
+    }
+    public ViddilKadriv(ViddilKadriv other)
+    {
+        Prizv = other.Prizv;
+        Inicialy = other.Inicialy;
+        RikNarodg = other.RikNarodg;
+        Oklad = other.Oklad;
+    }
+    public string Prizv
+    {
+        get => pr;
+        set => pr = !string.IsNullOrWhiteSpace(value) ? value : "Не вказано";
+    }
+    public string Inicialy
+    {
+        get => inic;
+        set => inic = !string.IsNullOrWhiteSpace(value) ? value : "Не вказано";
+    }
+    public int RikNarodg
+    {
+        get => rik;
+        set => rik = (value > 1950 && value < 2006) ? value : 2006;
+    }
+    public double Oklad
+    {
+        get => okl;
+        set => okl = (value > 0) ? value : 0.0;
+    }
+    public void Show()
+    {
+        Console.WriteLine(this);
+    }
+    public override string ToString()
+    {
+        return $"Прізвище: {Prizv}, Ініціали: {Inicialy}, Рік: {RikNarodg}, Оклад: {Oklad} грн.";
+    }
+    public int CompareTo(ViddilKadriv other)    // Сортування за окладом (від більшого до меншого)
+    {
+        return other.Oklad.CompareTo(this.Oklad);
+    }
+}
+class Program
+{
+    static void Main()
+    {
+        var col1 = new CollectionType<ViddilKadriv>();  //Створення колекцій
+        col1.Add(new ViddilKadriv("Іванов", "І.І.", 1975, 517.50));
+        col1.Add(new ViddilKadriv("Петренко", "П.П.", 1956, 219.10));
+        col1.Add(new ViddilKadriv("Паніковський", "П.П.", 1967, 300.00));
+        col1.Add(new ViddilKadriv("Сидоренко", "С.С.", 1980, 800.00));
+        col1.Add(new ViddilKadriv("Коваленко", "К.К.", 1960, 650.00));
+        Console.WriteLine("Початкова колекція:");
+        col1.PrintAll();
+        col1.Sort();        //Сортування
+        Console.WriteLine("\nПісля сортування за окладом (спадання):");
+        col1.PrintAll();
+        Console.WriteLine("\nПрацівники з окладом понад 500 грн:");        //LINQ-запит "оклад > 500"
+        var highSalary = col1.Query(x => x.Oklad > 500);
+        foreach (var emp in highSalary)
+            Console.WriteLine(emp);
+        Console.WriteLine("\nПрацівники, народжені до 1970 року:"); //LINQ-запит: народжені до 1970 року
+        var older = col1.Query(x => x.RikNarodg < 1970);
+        foreach (var emp in older)
+            Console.WriteLine(emp);
+        Console.WriteLine("\nНатисніть будь-яку клавішу для завершення.");
+        Console.ReadKey();
+    }
+}
