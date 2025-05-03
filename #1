@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-class CollectionType<T>
+class CollectionType<T> 
 {
     private List<T> items = new List<T>();
     public void Add(T item)     // Додати елемент
