@@ -1,0 +1,42 @@
+using System;
+using System.Collections.Generic;
+class CollectionType<T>
+{
+    private List<T> items = new List<T>();
+    public void Add(T item)     // Додати елемент
+    {
+        items.Add(item);
+    }
+    public bool Remove(T item)    // Видалити елемент
+    {
+        return items.Remove(item);
+    }
+    public int Count => items.Count;    // Кількість елементів
+    public T this[int index]    // Індексатор
+    {
+        get => items[index];
+        set => items[index] = value;
+    }
+    public void PrintAll()    // Вивести всі елементи
+    {
+        foreach (var item in items)
+        {
+            Console.WriteLine(item);
+        }
+    }
+}
+class Program
+{
+    static void Main()
+    {
+        var collection = new CollectionType<string>();
+        collection.Add("Hello");
+        collection.Add("World");
+        Console.WriteLine("Elements ");
+        collection.PrintAll();
+        Console.WriteLine($"\nNumber {collection.Count}");
+        collection.Remove("World");
+        Console.WriteLine("\nAfter remove ");
+        collection.PrintAll();
+    }
+}
