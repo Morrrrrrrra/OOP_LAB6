@@ -1,0 +1,59 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+class CollectionType<T>
+{
+    public List<T> Items { get; set; } = new List<T>();
+    public CollectionType() { }
+    public CollectionType(IEnumerable<T> items)
+    {
+        Items.AddRange(items);
+    }
+    public void Add(T item) => Items.Add(item);
+    public void Print()
+    {
+        Console.WriteLine("Collection elements:");
+        foreach (var item in Items)
+            Console.WriteLine(item);
+    }
+    public int Count => Items.Count;
+}
+class Program
+{
+    static void Main()
+    {
+        var collection = new CollectionType<string>();
+        collection.Add("Maths");
+        collection.Add("Physics");
+        collection.Add("Computer Science");
+        collection.Add("History");
+        collection.Add("English");
+        Console.WriteLine("Initial collection:");
+        collection.Print();
+        var containsS = collection.Items.Where(s => s.ToLower().Contains("s")).ToList();
+        Console.WriteLine("\nStrings containing the letter 's':");
+        containsS.ForEach(Console.WriteLine);
+        int countLength7 = collection.Items.Count(s => s.Length == 7);
+        Console.WriteLine($"\nNumber of strings with length 7: {countLength7}");
+        var asc = collection.Items.OrderBy(s => s).ToList();
+        Console.WriteLine("\nSorted in ascending order:");
+        asc.ForEach(Console.WriteLine);
+        var desc = collection.Items.OrderByDescending(s => s).ToList();
+        Console.WriteLine("\nSorted in descending order:");
+        desc.ForEach(Console.WriteLine);
+        var col1 = new CollectionType<string>(new[] { "Philosophy", "Logic", "Ethics" });
+        var col2 = new CollectionType<string>(new[] { "Biology", "Chemistry", "Physics", "Geography" });
+        var col3 = new CollectionType<string>(new[] { "Art", "Music" });
+        var collections = new[] { col1, col2, col3 };
+        int countSize3 = collections.Count(c => c.Count == 3);
+        Console.WriteLine($"\nNumber of collections with size 3: {countSize3}");
+        var minCollection = collections.OrderBy(c => c.Count).First();
+        var maxCollection = collections.OrderByDescending(c => c.Count).First();
+        Console.WriteLine("\nCollection with the minimum size:");
+        minCollection.Print();
+        Console.WriteLine("\nCollection with the maximum size:");
+        maxCollection.Print();
+        Console.WriteLine("\nPress any key to exit...");
+        Console.ReadKey();
+    }
+}
