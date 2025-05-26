@@ -1,4 +1,4 @@
-using System; 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 class CollectionType<T>
@@ -53,7 +53,5 @@ class Program
         minCollection.Print();
         Console.WriteLine("\nCollection with the maximum size:");
         maxCollection.Print();
-        Console.WriteLine("\nPress any key to exit...");
-        Console.ReadKey();
     }
 }
