@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-class ViddilKadriv : IComparable<ViddilKadriv>
+class ViddilKadriv
 {
     public string Prizv { get; set; }
     public string Inicialy { get; set; }
@@ -11,84 +11,62 @@ class ViddilKadriv : IComparable<ViddilKadriv>
     {
         Prizv = string.IsNullOrWhiteSpace(prizv) ? "Не вказано" : prizv;
         Inicialy = string.IsNullOrWhiteSpace(inic) ? "Не вказано" : inic;
-        RikNarodg = rik < 1950 || rik > 2006 ? 2006 : rik;
+        RikNarodg = (rik < 1950 || rik > 2006) ? 2006 : rik;
         Oklad = oklad < 0 ? 0 : oklad;
-    }
-    public int CompareTo(ViddilKadriv other)
-    {
-        return other.Oklad.CompareTo(this.Oklad); // За спаданням
     }
     public override string ToString()
     {
         return $"{Prizv}, {Inicialy}, {RikNarodg}, {Oklad} грн";
     }
 }
-class CollectionType<T> where T : IComparable<T>
-{
-    private List<T> items = new List<T>();
-    public void Add(T item) => items.Add(item);
-    public void AddRange(IEnumerable<T> collection) => items.AddRange(collection);
-    public void PrintAll() => items.ForEach(Console.WriteLine);
-    public void Sort() => items.Sort();
-    public List<T> ToList() => items.ToList();
-    public IEnumerable<T> Query(Func<T, bool> predicate) => items.Where(predicate);
-}
 class Program
 {
     static void Main()
     {
-        var col = new CollectionType<ViddilKadriv>();
-
-        col.AddRange(new[]
+        var workers = new List<ViddilKadriv>
         {
             new ViddilKadriv("Іванов", "І.І.", 1975, 517.50),
             new ViddilKadriv("Петренко", "П.П.", 1956, 219.10),
             new ViddilKadriv("Паніковський", "П.П.", 1967, 300.00),
             new ViddilKadriv("Шевченко", "Т.Г.", 1980, 900.00),
             new ViddilKadriv("", "", 2025, -100.00)
-        });
-        Console.WriteLine("Початкова колекція:");
-        col.PrintAll();
-        col.Sort();
-        Console.WriteLine("\nВідсортована колекція за окладом (спадання):");
-        col.PrintAll();
-        var list = col.ToList();
-        var query1 = list
+        };
+        Console.WriteLine("Всі працівники:");
+        workers.ForEach(Console.WriteLine);
+        var result1 = workers             // Прізвища працівників з окладом > 400, відсортовані за роком
             .Where(p => p.Oklad > 400)
             .OrderBy(p => p.RikNarodg)
             .Select(p => p.Prizv);
-        Console.WriteLine("\nОклад > 400, за роком народження:");
-        foreach (var name in query1)
+        Console.WriteLine("\nПрізвища працівників з окладом > 400, відсортовані за роком:");
+        foreach (var name in result1)
             Console.WriteLine(name);
-        var firstOld = list
+        var result2 = workers        // Перший працівник з найбільшим окладом із роком народження до 1970
             .Where(p => p.RikNarodg < 1970)
             .OrderByDescending(p => p.Oklad)
             .FirstOrDefault();
-        bool hasSimilar = list.Any(p => p.Oklad == firstOld?.Oklad && p != firstOld);
-        Console.WriteLine($"\nПерший < 1970: {firstOld?.Prizv}, оклад: {firstOld?.Oklad}");
-        Console.WriteLine($"Є інші з таким самим окладом: {(hasSimilar ? "так" : "ні")}");
-        var query3 = list
+        Console.WriteLine("\nПерший працівник з найбільшим окладом із роком народження до 1970:");
+        if (result2 != null)
+            Console.WriteLine($"{result2.Prizv}, {result2.Oklad}");
+        var result3 = workers        // Троє працівників з найбільшим окладом, чиє прізвище вказано
             .Where(p => p.Prizv != "Не вказано")
             .OrderByDescending(p => p.Oklad)
             .Take(3)
-            .Select(p => new { p.Prizv, p.Oklad });
-        Console.WriteLine("\nТоп-3 за окладом:");
-        foreach (var p in query3)
-            Console.WriteLine($"{p.Prizv}: {p.Oklad}");
-        var minP = list
+            .Select(p => $"{p.Prizv}: {p.Oklad} грн");
+        Console.WriteLine("\nТроє працівників з найбільшим окладом, чиє прізвище вказано:");
+        foreach (var item in result3)
+            Console.WriteLine(item);
+        var result4 = workers        // Найменший оклад серед робітників із ініціалами на «П»
             .Where(p => p.Inicialy.StartsWith("П"))
             .Select(p => p.Oklad)
             .DefaultIfEmpty()
             .Min();
-        Console.WriteLine($"\nМінімальний оклад з ініціалами на 'П': {minP}");
-        var grouped = list
+        Console.WriteLine($"\nНайменший оклад серед робітників із ініціалами на «П»: {result4} грн");
+        var result5 = workers        // Середній оклад за роками народження
             .GroupBy(p => p.RikNarodg)
             .OrderBy(g => g.Key)
             .Select(g => new { Rik = g.Key, Sredniy = g.Average(p => p.Oklad) });
-        Console.WriteLine("\nСередній оклад по роках народження:");
-        foreach (var g in grouped)
+        Console.WriteLine("\nСередній оклад заа роками народження:");
+        foreach (var g in result5)
             Console.WriteLine($"{g.Rik}: {g.Sredniy:F2} грн");
-        Console.WriteLine("\nНатисніть клавішу для завершення...");
-        Console.ReadKey();
     }
 }
