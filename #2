@@ -1,27 +1,26 @@
-using System; 
+using System;
 using System.Collections.Generic;
 using System.Linq;
-class CollectionType<T>       //Узагальнений клас
+class CollectionType<T> // Узагальнений клас
 {
     private List<T> items = new List<T>();
     public void Add(T item) => items.Add(item);
     public void AddRange(IEnumerable<T> collection) => items.AddRange(collection);
+    public List<T> ToList() => new List<T>(items);
     public void PrintAll()
     {
         foreach (var item in items)
             Console.WriteLine(item);
     }
-    public List<T> ToList() => new List<T>(items);
     public void Sort()
     {
         if (typeof(IComparable<T>).IsAssignableFrom(typeof(T)))
             items.Sort();
         else
-            Console.WriteLine("Клас не реалізує IComparable<T>, сортування недоступне.");
+            Console.WriteLine("Клас не реалізує IComparable<T>, сортування неможливе.");
     }
-    public IEnumerable<T> Query(Func<T, bool> predicate) => items.Where(predicate);
 }
-class ViddilKadriv : IComparable<ViddilKadriv>     //Клас з реалізацією IComparable
+class ViddilKadriv : IComparable<ViddilKadriv>
 {
     private string pr;
     private string inic;
@@ -68,15 +67,11 @@ class ViddilKadriv : IComparable<ViddilKadriv>     //Клас з реаліза�
         get => okl;
         set => okl = (value > 0) ? value : 0.0;
     }
-    public void Show()
-    {
-        Console.WriteLine(this);
-    }
     public override string ToString()
     {
         return $"Прізвище: {Prizv}, Ініціали: {Inicialy}, Рік: {RikNarodg}, Оклад: {Oklad} грн.";
     }
-    public int CompareTo(ViddilKadriv other)    // Сортування за окладом (від більшого до меншого)
+    public int CompareTo(ViddilKadriv other)
     {
         return other.Oklad.CompareTo(this.Oklad);
     }
@@ -85,26 +80,39 @@ class Program
 {
     static void Main()
     {
-        var col1 = new CollectionType<ViddilKadriv>();  //Створення колекцій
+        var col1 = new CollectionType<ViddilKadriv>();                 // Перша колекція
         col1.Add(new ViddilKadriv("Іванов", "І.І.", 1975, 517.50));
         col1.Add(new ViddilKadriv("Петренко", "П.П.", 1956, 219.10));
         col1.Add(new ViddilKadriv("Паніковський", "П.П.", 1967, 300.00));
         col1.Add(new ViddilKadriv("Сидоренко", "С.С.", 1980, 800.00));
         col1.Add(new ViddilKadriv("Коваленко", "К.К.", 1960, 650.00));
-        Console.WriteLine("Початкова колекція:");
+        var col2 = new CollectionType<ViddilKadriv>();                 // Друга колекція
+        col2.Add(new ViddilKadriv("Шевченко", "Т.Г.", 1972, 430.00));
+        col2.Add(new ViddilKadriv("Франко", "І.Я.", 1969, 720.00));
+        var col3 = new CollectionType<ViddilKadriv>();                 // Третя колекція
+        col3.Add(new ViddilKadriv("Лесіна", "Л.У.", 1985, 350.00)); 
+        CollectionType<ViddilKadriv>[] array = { col1, col2, col3 };   // Масив колекцій
+        Console.WriteLine("Початкова колекція:");                      // Вивід початкової першої колекції
         col1.PrintAll();
-        col1.Sort();        //Сортування
+        col1.Sort();                                                   // Сортування
         Console.WriteLine("\nПісля сортування за окладом (спадання):");
         col1.PrintAll();
-        Console.WriteLine("\nПрацівники з окладом понад 500 грн:");        //LINQ-запит "оклад > 500"
-        var highSalary = col1.Query(x => x.Oklad > 500);
-        foreach (var emp in highSalary)
-            Console.WriteLine(emp);
-        Console.WriteLine("\nПрацівники, народжені до 1970 року:"); //LINQ-запит: народжені до 1970 року
-        var older = col1.Query(x => x.RikNarodg < 1970);
-        foreach (var emp in older)
-            Console.WriteLine(emp);
-        Console.WriteLine("\nНатисніть будь-яку клавішу для завершення.");
-        Console.ReadKey();
+        Console.WriteLine("\nПрацівники з окладом понад 500 грн:");
+        var highSalary = col1.ToList().Where(emp => emp.Oklad > 500);       // LINQ-запит, де оклад > 500
+        foreach (var emp in highSalary) 
+        Console.WriteLine(emp);
+        Console.WriteLine("\nПрацівники, народжені до 1970 року:");
+        var olderEmployees = col1.ToList().Where(emp => emp.RikNarodg < 1970);    
+        foreach (var emp in olderEmployees)
+        Console.WriteLine(emp); 
+        int targetSize = 2;                                            // Пошук кількості колекцій розміру 2
+        int count = array.Count(c => c.ToList().Count == targetSize);
+        Console.WriteLine($"\nКількість колекцій з {targetSize} елементами: {count}");
+        var maxCollection = array.OrderByDescending(c => c.ToList().Count).First();  // Максимальна колекція
+        var minCollection = array.OrderBy(c => c.ToList().Count).First();            // Мінімальна колекція
+        Console.WriteLine("\nМаксимальна колекція:");
+        maxCollection.PrintAll();
+        Console.WriteLine("\nМінімальна колекція:");
+        minCollection.PrintAll();
     }
 }
